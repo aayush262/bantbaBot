@@ -20,6 +20,19 @@ const HeaderWithoutRouter = (props) => {
         setHeader(false);
       }
     })
+
+    if(window.innerWidth>=1024){
+      setMenu(true)
+    }
+
+    window.addEventListener('resize',()=>{
+      if(window.innerWidth>=1024){
+        setMenu(true);
+      }else{
+        setMenu(false)
+      }
+    })
+
   }, [])
   const clickHandler = () => {
     if (localStorage.getItem('data')) {
@@ -28,6 +41,7 @@ const HeaderWithoutRouter = (props) => {
       cogoToast.error('Please sign in first.')
     }
   }
+
 
   return (
 
