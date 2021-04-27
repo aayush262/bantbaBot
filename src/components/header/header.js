@@ -63,7 +63,7 @@ const HeaderWithoutRouter = (props) => {
                 <Link to="/">Home</Link>
               </li>
               <li className="menu-item-has-children">
-                <Link to="/">Lobby with Bobby</Link>
+                <Link to="/lobbywithbobby">Lobby with Bobby</Link>
 
               </li>
               <li className="menu-item-has-children">
