@@ -275,8 +275,8 @@ export class Lobby extends Component {
 
                                                 <div className="event-content">
                                                     <h3 style={{ color: '#34e5eb' }} className="event-title mb20">{lobby.name}</h3>
-                                                    <h4 className="event-title mb15">{lobby.timestamp - (Date.now()-20700000) >= 0 ? <DateCounter duration={lobby.timestamp - (Date.now()-20700000)}></DateCounter> : <>Countdown Completed.</>}</h4>
-                                                    {lobby.timestamp - Date.now() >= 0 ? <></> : <><button className="btn btn--medium btn--secondary">Check Matches</button></>}
+                                                    <h4 className="event-title mb15">{lobby.timestamp - (Date.now()+20700000) >= 0 ? <DateCounter duration={lobby.timestamp - (Date.now()+20700000)}></DateCounter> : <>Countdown Completed.</>}</h4>
+                                                    {lobby.timestamp - (Date.now()+20700000) >= 0 ? <></> : <><button className="btn btn--medium btn--secondary">Check Matches</button></>}
                                                     {lobby.owner.id === this.props.user._id ? <button onClick={this.handleDelete.bind('this', lobby._id)} className="btn btn--medium  btn--blue-light">Collapse</button> : <></>}
                                                 </div>
                                                 <div className="event-venue">
@@ -286,7 +286,7 @@ export class Lobby extends Component {
                                                     </div>
                                                     <div className="event-date">
 
-                                                        <h6><i className="fas fa-gamepad"></i>&nbsp;{lobby.game}</h6> &nbsp;{Date.now()-20700000 >= lobby.timestamp ? <button className="btn btn--small btn--dark">Expired </button> : this.checkJoin(lobby.players) ? <button className="btn btn--small btn--green-light">Joined </button> : this.state.isJoining ? <button disabled={true} className="btn btn--small btn--green-light">Joining </button> : <button onClick={this.handleJoin.bind(this, lobby._id)} className="btn btn--small btn--green-light">Join </button>}
+                                                        <h6><i className="fas fa-gamepad"></i>&nbsp;{lobby.game}</h6> &nbsp;{Date.now()+20700000 >= lobby.timestamp ? <button className="btn btn--small btn--dark">Expired </button> : this.checkJoin(lobby.players) ? <button className="btn btn--small btn--green-light">Joined </button> : this.state.isJoining ? <button disabled={true} className="btn btn--small btn--green-light">Joining </button> : <button onClick={this.handleJoin.bind(this, lobby._id)} className="btn btn--small btn--green-light">Join </button>}
                                                     </div>
 
                                                     <div className="author-block">
