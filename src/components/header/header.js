@@ -42,6 +42,14 @@ const HeaderWithoutRouter = (props) => {
     }
   }
 
+  const lobbyHandler =()=>{
+    if (localStorage.getItem('data')) {
+      props.history.push('/lobbywithbobby')
+    } else {
+      cogoToast.error('Please sign in first.')
+    }
+  }
+
 
   return (
 
@@ -63,7 +71,7 @@ const HeaderWithoutRouter = (props) => {
                 <Link to="/">Home</Link>
               </li>
               <li className="menu-item-has-children">
-                <Link to="/lobbywithbobby">Lobby with Bobby</Link>
+                <a className="myNavButton" onClick={lobbyHandler}>Lobby with Bobby</a>
 
               </li>
               <li className="menu-item-has-children">
