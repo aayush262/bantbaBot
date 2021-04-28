@@ -4,6 +4,7 @@ import axios from "axios";
 import cogoToast from "cogo-toast";
 import { DateCounter } from "../dateCount/dateCount";
 import Modal from 'react-modal';
+import { Loader } from "../loader/loader";
 
 
 Modal.setAppElement('#root')
@@ -26,6 +27,7 @@ export class Lobby extends Component {
     constructor() {
         super()
         this.state = {
+            isLoading: false,
             isCreate: false,
             isLeague: false,
             isAdding: false,
@@ -54,7 +56,8 @@ export class Lobby extends Component {
                         id: ''
                     }
                 }
-            ]
+            ],
+            players:[]
         }
     }
     handleCreate = (type) => {
@@ -118,19 +121,26 @@ export class Lobby extends Component {
         })
     }
     componentDidMount() {
-        this.interval = setInterval(async () => {
-            const { data } = await axios.get(`${process.env.REACT_APP_BASE_URL}/lobby`)
+        this.setState(() => {
+            return {
+                isLoading: true
+            }
 
-            this.setState((preState) => {
-                return {
-                    ...preState,
-                    lobbies: data,
+        }, () => {
+            this.interval = setInterval(async () => {
+                const { data } = await axios.get(`${process.env.REACT_APP_BASE_URL}/lobby`)
 
-                }
-            })
+                this.setState((preState) => {
+                    return {
+                        ...preState,
+                        lobbies: data,
+                        isLoading: false
+                    }
+                })
 
-        }, 1000)
+            }, 1000)
 
+        })
     }
     componentWillUnmount() {
         clearInterval(this.interval)
@@ -199,18 +209,27 @@ export class Lobby extends Component {
         })
     }
 
-    openModal = () => {
+    openModal = (id) => {
+        let players=[];
+        
+        this.state.lobbies.forEach(lobby=>{
+            if(lobby._id===id){
+                players = lobby.players
+            }
+        })
+        console.log(players)
         this.setState((preState) => {
             return {
                 ...preState,
-                modalIsOpen: true
+                modalIsOpen: true,
+                players
             }
         })
     }
 
     render() {
 
-        console.log(this.state)
+        
         return (
             <>
                 <section className="pt-mobile-80">
@@ -262,80 +281,86 @@ export class Lobby extends Component {
                                         </div>
                                     </form>
                                 </div> : <></>}
-                                {this.state.lobbies.length !== 0 ? <h4>Recent Leagues / Lobbies</h4> : <></>}
-                                {this.state.lobbies.length !== 0 ?
-                                    this.state.lobbies.map((lobby) => {
+                                {this.state.isLoading ?<Loader></Loader> : <>
 
-                                        return <div key={lobby._id}>
+                                    {this.state.lobbies.length !== 0 ? <h4>Recent Leagues / Lobbies</h4> : <></>}
+                                    {this.state.lobbies.length !== 0 ?
+                                        this.state.lobbies.map((lobby) => {
 
-                                            <div style={{ background: `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url(${lobby.game === 'Chess' ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiFoJYHvH8RZt_QkDQ_SirIaNqSz3X0T3Aeg&usqp=CAU" : "https://wallpapercave.com/wp/wp2532627.jpg"})`, backgroundPosition: 'center', backgroundSize: 'cover', marginBottom: '40px', border: '2px solid #ffba00' }} className="crumina-module crumina-event-item">
-                                                <div className="event-thumb bg-event5">
-                                                    <div className="overlay" />
-                                                </div>
+                                            return <div key={lobby._id}>
 
-                                                <div className="event-content">
-                                                    <h3 style={{ color: '#34e5eb' }} className="event-title mb20">{lobby.name}</h3>
-                                                    <h4 className="event-title mb15">{lobby.timestamp - (Date.now()+20700000) >= 0 ? <DateCounter duration={lobby.timestamp - (Date.now()+20700000)}></DateCounter> : <>Countdown Completed.</>}</h4>
-                                                    {lobby.timestamp - (Date.now()+20700000) >= 0 ? <></> : <><button className="btn btn--medium btn--secondary">Check Matches</button></>}
-                                                    {lobby.owner.id === this.props.user._id ? <button onClick={this.handleDelete.bind('this', lobby._id)} className="btn btn--medium  btn--blue-light">Collapse</button> : <></>}
-                                                </div>
-                                                <div className="event-venue">
-                                                    <div className="event-date">
-
-                                                        <h6 onClick={this.openModal}><i className="fas fa-users"></i> {lobby.players.length}</h6>
-                                                    </div>
-                                                    <div className="event-date">
-
-                                                        <h6><i className="fas fa-gamepad"></i>&nbsp;{lobby.game}</h6> &nbsp;{Date.now()+20700000 >= lobby.timestamp ? <button className="btn btn--small btn--dark">Expired </button> : this.checkJoin(lobby.players) ? <button className="btn btn--small btn--green-light">Joined </button> : this.state.isJoining ? <button disabled={true} className="btn btn--small btn--green-light">Joining </button> : <button onClick={this.handleJoin.bind(this, lobby._id)} className="btn btn--small btn--green-light">Join </button>}
+                                                <div style={{ background: `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url(${lobby.game === 'Chess' ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiFoJYHvH8RZt_QkDQ_SirIaNqSz3X0T3Aeg&usqp=CAU" : "https://wallpapercave.com/wp/wp2532627.jpg"})`, backgroundPosition: 'center', backgroundSize: 'cover', marginBottom: '40px', border: '2px solid #ffba00' }} className="crumina-module crumina-event-item">
+                                                    <div className="event-thumb bg-event5">
+                                                        <div className="overlay" />
                                                     </div>
 
-                                                    <div className="author-block">
-                                                        <div className="avatar avatar60">
-                                                            <h5>Type:</h5>
+                                                    <div className="event-content">
+                                                        <h3 style={{ color: '#34e5eb' }} className="event-title mb20">{lobby.name}</h3>
+                                                        <h4 className="event-title mb15">{lobby.timestamp - (Date.now() + 20700000) >= 0 ? <DateCounter duration={lobby.timestamp - (Date.now() + 20700000)}></DateCounter> : <>Countdown Completed.</>}</h4>
+                                                        {lobby.timestamp - (Date.now() + 20700000) >= 0 ? <></> : <><button className="btn btn--medium btn--secondary">Check Matches</button></>}
+                                                        {lobby.owner.id === this.props.user._id ? <button onClick={this.handleDelete.bind('this', lobby._id)} className="btn btn--medium  btn--blue-light">Collapse</button> : <></>}
+                                                    </div>
+                                                    <div className="event-venue">
+                                                        <div className="event-date">
+
+                                                            <h6 onClick={this.openModal.bind(this,lobby._id)}><i className="fas fa-users"></i> {lobby.players.length}</h6>
                                                         </div>
-                                                        <div className="author-content">
-                                                            <h5>{lobby.type}</h5>
+                                                        <div className="event-date">
 
+                                                            <h6><i className="fas fa-gamepad"></i>&nbsp;{lobby.game}</h6> &nbsp;{Date.now() + 20700000 >= lobby.timestamp ? <button className="btn btn--small btn--dark">Expired </button> : this.checkJoin(lobby.players) ? <button className="btn btn--small btn--green-light">Joined </button> : this.state.isJoining ? <button disabled={true} className="btn btn--small btn--green-light">Joining </button> : <button onClick={this.handleJoin.bind(this, lobby._id)} className="btn btn--small btn--green-light">Join </button>}
                                                         </div>
+
+                                                        <div className="author-block">
+                                                            <div className="avatar avatar60">
+                                                                <h5>Type:</h5>
+                                                            </div>
+                                                            <div className="author-content">
+                                                                <h5>{lobby.type}</h5>
+
+                                                            </div>
+                                                        </div>
+                                                        <p>Created by : {lobby.owner.name}</p>
                                                     </div>
-                                                    <p>Created by : {lobby.owner.name}</p>
                                                 </div>
+                                                
                                             </div>
-                                            <Modal
-                                                isOpen={this.state.modalIsOpen}
+                                        })
 
-                                                onRequestClose={this.closeModal}
-                                                style={customStyles}
-                                                contentLabel="Players Modal"
-                                            >
+                                        : <h4>No any Lobbies/ Leagues</h4>}
+                                </>}
 
-                                                <div>
-                                                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                        <table className="table--style2">
-                                                            
-                                                            <tbody>
-                                                            {lobby.players.map(player=>{
-                                                                        return <tr key={player.id}>
-                                                                            <td>{player.name}</td>
-                                                                        </tr>
-                                                                    })}
-
-
-                                                            </tbody>
-
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </Modal>
-                                        </div>
-                                    })
-
-                                    : <h4>No any Lobbies/ Leagues</h4>}
                             </div>
                         </div>
 
                     </div>
                 </section>
+
+                <Modal
+                                                    isOpen={this.state.modalIsOpen}
+
+                                                    onRequestClose={this.closeModal}
+                                                    style={customStyles}
+                                                    contentLabel="Players Modal"
+                                                >
+
+                                                    <div>
+                                                        <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            <table className="table--style2">
+
+                                                                <tbody>
+                                                                   {this.state.players.map(player=>{
+                                                                       return <tr key={player.id}>
+                                                                            <td>{player.name}</td>
+                                                                       </tr>
+                                                                   })}
+
+
+                                                                </tbody>
+
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </Modal>
 
             </>
         )
