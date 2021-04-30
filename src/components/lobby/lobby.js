@@ -5,7 +5,7 @@ import cogoToast from "cogo-toast";
 import { DateCounter } from "../dateCount/dateCount";
 import Modal from 'react-modal';
 import { Loader } from "../loader/loader";
-
+import { withRouter } from 'react-router-dom';
 
 Modal.setAppElement('#root')
 
@@ -23,7 +23,7 @@ const customStyles = {
     }
 };
 
-export class Lobby extends Component {
+ class LobbywithoutRouter extends Component {
     constructor() {
         super()
         this.state = {
@@ -63,6 +63,7 @@ export class Lobby extends Component {
     handleCreate = (type) => {
         this.setState(preState => {
             return {
+               
                 isCreate: !preState.isCreate,
                 isLeague: type === 'league' ? true : false.isCreate,
                 data: {
@@ -165,7 +166,9 @@ export class Lobby extends Component {
                 ...preState,
                 isJoining: true
             }
-        }, async () => {
+        },
+        async () => {
+            console.log(this.state.isJoining)
             try {
                 const { data } = await axios.post(`${process.env.REACT_APP_BASE_URL}/lobby/${id}`, {
                     id: this.props.user._id,
@@ -176,14 +179,14 @@ export class Lobby extends Component {
                     },
                     responseType: 'json'
                 })
-
+                
                 cogoToast.success(data.message);
                 this.setState((preState) => {
                     return {
                         ...preState,
                         isJoining: false
                     }
-                })
+                },()=>{console.log(this.state.isJoining)})
             } catch (e) {
                 console.log(e)
             }
@@ -191,6 +194,7 @@ export class Lobby extends Component {
     }
 
     checkJoin = (players) => {
+        
         let isJoin = false
         players.forEach((player) => {
             if (player.id === this.props.user._id) {
@@ -217,7 +221,7 @@ export class Lobby extends Component {
                 players = lobby.players
             }
         })
-        console.log(players)
+       
         this.setState((preState) => {
             return {
                 ...preState,
@@ -227,9 +231,28 @@ export class Lobby extends Component {
         })
     }
 
+    getMatchDetails=async(players,lobbyId)=>{
+        console.log(players.length)
+        if(players.length<=1){
+            cogoToast.error('Sorry cannot create fixture for one or less players')
+        }
+        else{
+            const matches = await axios.post(`${process.env.REACT_APP_BASE_URL}/match`,{
+                players,lobbyId
+            },{
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'json'
+            })
+            
+            this.props.history.push(`/matches/${lobbyId}`)
+        }
+        
+    }
+
     render() {
 
-        
         return (
             <>
                 <section className="pt-mobile-80">
@@ -297,7 +320,7 @@ export class Lobby extends Component {
                                                     <div className="event-content">
                                                         <h3 style={{ color: '#34e5eb' }} className="event-title mb20">{lobby.name}</h3>
                                                         <h4 className="event-title mb15">{lobby.timestamp - (Date.now() + 20700000) >= 0 ? <DateCounter duration={lobby.timestamp - (Date.now() + 20700000)}></DateCounter> : <>Countdown Completed.</>}</h4>
-                                                        {lobby.timestamp - (Date.now() + 20700000) >= 0 ? <></> : <><button className="btn btn--medium btn--secondary">Check Matches</button></>}
+                                                        {lobby.timestamp - (Date.now() + 20700000) >= 0 ? <></> : <><button onClick={this.getMatchDetails.bind(this,lobby.players,lobby._id)} className="btn btn--medium btn--secondary">Check Matches</button></>}
                                                         {lobby.owner.id === this.props.user._id ? <button onClick={this.handleDelete.bind('this', lobby._id)} className="btn btn--medium  btn--blue-light">Collapse</button> : <></>}
                                                     </div>
                                                     <div className="event-venue">
@@ -367,3 +390,7 @@ export class Lobby extends Component {
     }
 
 }
+
+
+
+export const Lobby = withRouter(LobbywithoutRouter)
