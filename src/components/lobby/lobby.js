@@ -168,11 +168,12 @@ const customStyles = {
             }
         },
         async () => {
-            console.log(this.state.isJoining)
+            
             try {
                 const { data } = await axios.post(`${process.env.REACT_APP_BASE_URL}/lobby/${id}`, {
                     id: this.props.user._id,
-                    name: this.props.user.name
+                    name: this.props.user.name,
+                    points: 0
                 }, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -231,14 +232,17 @@ const customStyles = {
         })
     }
 
-    getMatchDetails=async(players,lobbyId,owner)=>{
-        console.log(players.length)
-        if(players.length<=1){
+    getMatchDetails=async(lobby)=>{
+        
+
+        
+        if(lobby.players.length<=1){
             cogoToast.error('Sorry cannot create fixture for one or less players')
         }
         else{
+            
             const matches = await axios.post(`${process.env.REACT_APP_BASE_URL}/match`,{
-                players,lobbyId,owner
+                lobby
             },{
                 headers: {
                     'Content-Type': 'application/json'
@@ -246,7 +250,7 @@ const customStyles = {
                 responseType: 'json'
             })
             
-            this.props.history.push(`/matches/${lobbyId}`)
+            this.props.history.push(`/matches/${lobby._id}`)
         }
         
     }
@@ -320,7 +324,7 @@ const customStyles = {
                                                     <div className="event-content">
                                                         <h3 style={{ color: '#34e5eb' }} className="event-title mb20">{lobby.name}</h3>
                                                         <h4 className="event-title mb15">{lobby.timestamp - (Date.now() + 20700000) >= 0 ? <DateCounter duration={lobby.timestamp - (Date.now() + 20700000)}></DateCounter> : <>Countdown Completed.</>}</h4>
-                                                        {lobby.timestamp - (Date.now() + 20700000) >= 0 ? <></> : <><button onClick={this.getMatchDetails.bind(this,lobby.players,lobby._id,lobby.owner)} className="btn btn--medium btn--secondary">Check Matches</button></>}
+                                                        {lobby.timestamp - (Date.now() + 20700000) >= 0 ? <></> : <><button onClick={this.getMatchDetails.bind(this,lobby)} className="btn btn--medium btn--secondary">Check Matches</button></>}
                                                         {lobby.owner.id === this.props.user._id ? <button onClick={this.handleDelete.bind('this', lobby._id)} className="btn btn--medium  btn--blue-light">Collapse</button> : <></>}
                                                     </div>
                                                     <div className="event-venue">
