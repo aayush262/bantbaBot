@@ -235,8 +235,10 @@ const customStyles = {
     getMatchDetails=async(lobby)=>{
         
 
-        
-        if(lobby.players.length<=1){
+        if(lobby.type==='lobby' && lobby.players.length<10){
+            cogoToast.error('Insufficient players. At least 10 players required for lobby games. Try creating league if you have less than 10 players.')
+        }
+        else if(lobby.players.length<=1){
             cogoToast.error('Sorry cannot create fixture for one or less players')
         }
         else{
