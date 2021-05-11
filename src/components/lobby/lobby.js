@@ -338,9 +338,7 @@ const customStyles = {
 
                                             return <div key={lobby._id}>
 
-                                                <div>
-                                                <button onClick={this.getMatchDetails.bind(this,lobby)} className="btn btn--medium btn--secondary">Check Matches</button>
-                                                </div>
+                                              
 
                                                 <div style={{ background: `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url(${lobby.game === 'Chess' ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiFoJYHvH8RZt_QkDQ_SirIaNqSz3X0T3Aeg&usqp=CAU" : "https://wallpapercave.com/wp/wp2532627.jpg"})`, backgroundPosition: 'center', backgroundSize: 'cover', marginBottom: '40px', border: '2px solid #ffba00' }} className="crumina-module crumina-event-item">
                                                     <div className="event-thumb bg-event5">
