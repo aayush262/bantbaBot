@@ -85,7 +85,7 @@ const HeaderWithoutRouter = (props) => {
                 <Link to="/">TV Shows</Link>
               </li>
               <li className="menu-item-has-mega-menu menu-item-has-children">
-                <Link to="/">More</Link>
+                <Link to="/anime">Anime</Link>
               </li>
             </ul>
           </nav>

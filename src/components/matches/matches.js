@@ -19,19 +19,20 @@ export class Matches extends React.Component {
             user: {
 
             },
-            owner:{
-                id:'',
-                name:''
+            owner: {
+                id: '',
+                name: ''
             },
-            players:[
+            players: [
                 {
-                    id:'',
-                    name:'',
+                    id: '',
+                    name: '',
                     points: 0
                 }
             ],
-            lobbyName:'',
-            game:''
+            lobbyName: '',
+            game: '',
+            type: ''
         }
     }
 
@@ -45,12 +46,42 @@ export class Matches extends React.Component {
             owner: data.owner,
             players: data.players,
             lobbyName: data.name,
-            game: data.game
+            game: data.game,
+            type: data.type
 
         })
     }
     render() {
-        console.log(this.state.matches);
+        const length = this.state.players.length;
+        console.log(length)
+        const dire = [{}];
+        const radiant = [{}];
+        for (var i = 5; i < length; i++) {
+            dire.push(this.state.players[i])
+        }
+        for (var i = 0; i < 5; i++) {
+            radiant.push(this.state.players[i])
+        }
+        const radiantTable = radiant.map((player) => {
+            if (player) {
+                return <tr key={player.id}>
+
+                    <td>{player.name}</td>
+
+                </tr>
+            }
+        })
+        const direTable = dire.map((player) => {
+
+            if (player) {
+                return <tr key={player.id}>
+
+                    <td>{player.name}</td>
+
+                </tr>
+            }
+        })
+
         return (
             <>
                 <Header></Header>
@@ -59,10 +90,16 @@ export class Matches extends React.Component {
                     <section className="pt-mobile-80">
                         <div className="container">
                             <div className="row medium-padding100">
-                            <h3 className="event-title mb20" style={{color:'rgb(52, 229, 235)'}}>{this.state.lobbyName}&nbsp;&nbsp;<span style={{color:'white'}}>({this.state.game})</span></h3>
+                                <h3 className="event-title mb20" style={{ color: 'rgb(52, 229, 235)' }}>{this.state.lobbyName}&nbsp;&nbsp;<span style={{ color: 'white' }}>({this.state.game})</span></h3>
                                 <div className="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <h3>Matches</h3>
-                                    <table>
+                                    <h3>{this.state.type === 'lobby' ? 'Radiant' : 'Matches'}</h3>
+                                    {this.state.type === 'lobby' ? <table style={{ border: '2px solid red' }}>
+
+                                        <tbody>
+                                            {radiantTable}
+
+                                        </tbody>
+                                    </table> : <table>
                                         <thead>
                                             <tr>
                                                 <th>Game</th>
@@ -72,46 +109,32 @@ export class Matches extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            
-                                            {this.state.matches.map((match,index)=>{
+
+                                            {this.state.matches.map((match, index) => {
                                                 return <tr key={match._id}>
-                                                    <td>{index+1}</td>
-                                                    
-                                                <td>{match.player1.name}</td>
-                                                <td><span style={{color:'green'}}>VS</span></td>
-                                                <td>{match.player2.name}</td>
-                                            </tr>
+                                                    <td>{index + 1}</td>
+
+                                                    <td>{match.player1.name}</td>
+                                                    <td><span style={{ color: 'green' }}>VS</span></td>
+                                                    <td>{match.player2.name}</td>
+                                                </tr>
                                             })}
                                         </tbody>
                                     </table>
+                                    }
                                 </div>
                                 <div className="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                                    <h3>Table</h3>
-                                    <table  style={{border:'2px solid red'}}>
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Players</th>
-                                                <th>Points</th>
-                                                
-                                            </tr>
-                                        </thead>
+                                    <h3>{this.state.type === 'lobby' ? 'Dire' : 'Table'}</h3>
+                                    <table style={{ border: '2px solid red' }}>
+
                                         <tbody>
-                                            
-                                            {this.state.players.map((player,index)=>{
-                                                return <tr key={player.id}>
-                                                    <td>{index+1}</td>
-                                                    
-                                                <td>{player.name}</td>
-                                                
-                                                <td>{player.points}</td>
-                                            </tr>
-                                            })}
+
+                                            {direTable}
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                            
+
                             <hr className="divider" />
                         </div>
                     </section>

@@ -233,15 +233,34 @@ const customStyles = {
     }
 
     getMatchDetails=async(lobby)=>{
-        
+      
+        if(lobby.type==='lobby'){
 
-        if(lobby.type==='lobby' && lobby.players.length<10){
-            cogoToast.error('Insufficient players. At least 10 players required for lobby games. Try creating league if you have less than 10 players.')
+            if(lobby.players.length<10){
+            return cogoToast.error('Insufficient players. At least 10 players required for lobby games. Try creating league if you have less than 10 players.')
+            }
+            lobby.players.sort(()=>Math.random()-0.5);
+            console.log(lobby.players)
+
+             await axios.put(`${process.env.REACT_APP_BASE_URL}/lobby/${lobby._id}`,{
+                players: lobby.players
+            },{
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                responseType: 'json'
+            })
+            
+            return this.props.history.push(`/matches/${lobby._id}`)
+            
+           
         }
+
         else if(lobby.players.length<=1){
             cogoToast.error('Sorry cannot create fixture for one or less players')
         }
         else{
+            ;
             
             const matches = await axios.post(`${process.env.REACT_APP_BASE_URL}/match`,{
                 lobby
@@ -261,6 +280,7 @@ const customStyles = {
 
         return (
             <>
+                
                 <section className="pt-mobile-80">
 
                     <div className="container">
@@ -317,6 +337,10 @@ const customStyles = {
                                         this.state.lobbies.map((lobby) => {
 
                                             return <div key={lobby._id}>
+
+                                                <div>
+                                                <button onClick={this.getMatchDetails.bind(this,lobby)} className="btn btn--medium btn--secondary">Check Matches</button>
+                                                </div>
 
                                                 <div style={{ background: `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url(${lobby.game === 'Chess' ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiFoJYHvH8RZt_QkDQ_SirIaNqSz3X0T3Aeg&usqp=CAU" : "https://wallpapercave.com/wp/wp2532627.jpg"})`, backgroundPosition: 'center', backgroundSize: 'cover', marginBottom: '40px', border: '2px solid #ffba00' }} className="crumina-module crumina-event-item">
                                                     <div className="event-thumb bg-event5">
