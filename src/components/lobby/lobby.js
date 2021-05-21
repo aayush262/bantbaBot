@@ -23,7 +23,7 @@ const customStyles = {
     }
 };
 
- class LobbywithoutRouter extends Component {
+class LobbywithoutRouter extends Component {
     constructor() {
         super()
         this.state = {
@@ -57,19 +57,29 @@ const customStyles = {
                     }
                 }
             ],
-            players:[]
+            players: []
         }
     }
-    handleCreate = (type) => {
+    handleCreate = async (type) => {
+        let mmr;
+        if (!this.props.user.steamId) {
+            mmr = 3500
+        } else {
+            const { data } = await axios.get(`https://api.opendota.com/api/players/${this.props.user.steamId}`)
+            mmr = data.mmr_estimate.estimate;
+        }
+
+
         this.setState(preState => {
             return {
-               
+
                 isCreate: !preState.isCreate,
                 isLeague: type === 'league' ? true : false.isCreate,
                 data: {
                     owner: {
                         id: this.props.user._id,
-                        name: this.props.user.name
+                        name: this.props.user.name,
+                        mmr
                     },
                     game: 'Dota2',
                     type
@@ -167,35 +177,45 @@ const customStyles = {
                 isJoining: true
             }
         },
-        async () => {
-            
-            try {
-                const { data } = await axios.post(`${process.env.REACT_APP_BASE_URL}/lobby/${id}`, {
-                    id: this.props.user._id,
-                    name: this.props.user.name,
-                    points: 0
-                }, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    responseType: 'json'
-                })
-                
-                cogoToast.success(data.message);
-                this.setState((preState) => {
-                    return {
-                        ...preState,
-                        isJoining: false
+            async () => {
+
+                try {
+                    let mmr;
+                    if (!this.props.user.steamId) {
+                        mmr = 3500
+                    } else {
+                        const { data } = await axios.get(`https://api.opendota.com/api/players/${this.props.user.steamId}`)
+                        mmr = data.mmr_estimate.estimate;
                     }
-                },()=>{console.log(this.state.isJoining)})
-            } catch (e) {
-                console.log(e)
-            }
-        })
+
+
+                    const { data } = await axios.post(`${process.env.REACT_APP_BASE_URL}/lobby/${id}`, {
+                        id: this.props.user._id,
+                        name: this.props.user.name,
+                        mmr,
+                        points: 0
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        responseType: 'json'
+                    })
+
+                    cogoToast.success(data.message);
+                    this.setState((preState) => {
+                        return {
+                            ...preState,
+                            isJoining: false
+                        }
+                    }, () => { console.log(this.state.isJoining) })
+                } catch (e) {
+                    console.log(e)
+                }
+            })
     }
 
     checkJoin = (players) => {
-        
+
         let isJoin = false
         players.forEach((player) => {
             if (player.id === this.props.user._id) {
@@ -215,14 +235,14 @@ const customStyles = {
     }
 
     openModal = (id) => {
-        let players=[];
-        
-        this.state.lobbies.forEach(lobby=>{
-            if(lobby._id===id){
+        let players = [];
+
+        this.state.lobbies.forEach(lobby => {
+            if (lobby._id === id) {
                 players = lobby.players
             }
         })
-       
+
         this.setState((preState) => {
             return {
                 ...preState,
@@ -232,55 +252,44 @@ const customStyles = {
         })
     }
 
-    getMatchDetails=async(lobby)=>{
-      
-        if(lobby.type==='lobby'){
+    getMatchDetails = async (lobby) => {
 
-            if(lobby.players.length<10){
-            return cogoToast.error('Insufficient players. At least 10 players required for lobby games. Try creating league if you have less than 10 players.')
+        if (lobby.type === 'lobby') {
+
+            if (lobby.players.length < 10) {
+                return cogoToast.error('Insufficient players. At least 10 players required for lobby games. Try creating league if you have less than 10 players.')
             }
-            lobby.players.sort(()=>Math.random()-0.5);
-            console.log(lobby.players)
 
-             await axios.put(`${process.env.REACT_APP_BASE_URL}/lobby/${lobby._id}`,{
-                players: lobby.players
-            },{
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                responseType: 'json'
-            })
-            
             return this.props.history.push(`/matches/${lobby._id}`)
-            
-           
+
+
         }
 
-        else if(lobby.players.length<=1){
+        else if (lobby.players.length <= 1) {
             cogoToast.error('Sorry cannot create fixture for one or less players')
         }
-        else{
+        else {
             ;
-            
-            const matches = await axios.post(`${process.env.REACT_APP_BASE_URL}/match`,{
+
+            const matches = await axios.post(`${process.env.REACT_APP_BASE_URL}/match`, {
                 lobby
-            },{
+            }, {
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 responseType: 'json'
             })
-            
+
             this.props.history.push(`/matches/${lobby._id}`)
         }
-        
+
     }
 
     render() {
 
         return (
             <>
-                
+
                 <section className="pt-mobile-80">
 
                     <div className="container">
@@ -330,7 +339,7 @@ const customStyles = {
                                         </div>
                                     </form>
                                 </div> : <></>}
-                                {this.state.isLoading ?<Loader></Loader> : <>
+                                {this.state.isLoading ? <Loader></Loader> : <>
 
                                     {this.state.lobbies.length !== 0 ? <h4>Recent Leagues / Lobbies</h4> : <></>}
                                     {this.state.lobbies.length !== 0 ?
@@ -338,7 +347,7 @@ const customStyles = {
 
                                             return <div key={lobby._id}>
 
-                                              
+
 
                                                 <div style={{ background: `linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url(${lobby.game === 'Chess' ? "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiFoJYHvH8RZt_QkDQ_SirIaNqSz3X0T3Aeg&usqp=CAU" : "https://wallpapercave.com/wp/wp2532627.jpg"})`, backgroundPosition: 'center', backgroundSize: 'cover', marginBottom: '40px', border: '2px solid #ffba00' }} className="crumina-module crumina-event-item">
                                                     <div className="event-thumb bg-event5">
@@ -348,13 +357,13 @@ const customStyles = {
                                                     <div className="event-content">
                                                         <h3 style={{ color: '#34e5eb' }} className="event-title mb20">{lobby.name}</h3>
                                                         <h4 className="event-title mb15">{lobby.timestamp - (Date.now() + 20700000) >= 0 ? <DateCounter duration={lobby.timestamp - (Date.now() + 20700000)}></DateCounter> : <>Countdown Completed.</>}</h4>
-                                                        {lobby.timestamp - (Date.now() + 20700000) >= 0 ? <></> : <><button onClick={this.getMatchDetails.bind(this,lobby)} className="btn btn--medium btn--secondary">Check Matches</button></>}
+                                                        {lobby.timestamp - (Date.now() + 20700000) >= 0 ? <></> : <><button onClick={this.getMatchDetails.bind(this, lobby)} className="btn btn--medium btn--secondary">Check Matches</button></>}
                                                         {lobby.owner.id === this.props.user._id ? <button onClick={this.handleDelete.bind('this', lobby._id)} className="btn btn--medium  btn--blue-light">Collapse</button> : <></>}
                                                     </div>
                                                     <div className="event-venue">
                                                         <div className="event-date">
 
-                                                            <h6 onClick={this.openModal.bind(this,lobby._id)}><i className="fas fa-users"></i> {lobby.players.length}</h6>
+                                                            <h6 onClick={this.openModal.bind(this, lobby._id)}><i className="fas fa-users"></i> {lobby.players.length}</h6>
                                                         </div>
                                                         <div className="event-date">
 
@@ -373,7 +382,7 @@ const customStyles = {
                                                         <p>Created by : {lobby.owner.name}</p>
                                                     </div>
                                                 </div>
-                                                
+
                                             </div>
                                         })
 
@@ -387,31 +396,31 @@ const customStyles = {
                 </section>
 
                 <Modal
-                                                    isOpen={this.state.modalIsOpen}
+                    isOpen={this.state.modalIsOpen}
 
-                                                    onRequestClose={this.closeModal}
-                                                    style={customStyles}
-                                                    contentLabel="Players Modal"
-                                                >
+                    onRequestClose={this.closeModal}
+                    style={customStyles}
+                    contentLabel="Players Modal"
+                >
 
-                                                    <div>
-                                                        <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                            <table className="table--style2">
+                    <div>
+                        <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <table className="table--style2">
 
-                                                                <tbody>
-                                                                   {this.state.players.map(player=>{
-                                                                       return <tr key={player.id}>
-                                                                            <td>{player.name}</td>
-                                                                       </tr>
-                                                                   })}
+                                <tbody>
+                                    {this.state.players.map(player => {
+                                        return <tr key={player.id}>
+                                            <td>{player.name}</td>
+                                        </tr>
+                                    })}
 
 
-                                                                </tbody>
+                                </tbody>
 
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </Modal>
+                            </table>
+                        </div>
+                    </div>
+                </Modal>
 
             </>
         )
